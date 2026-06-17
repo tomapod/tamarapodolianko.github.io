@@ -225,6 +225,93 @@ html, body {
   background: var(--paper);
 }
 .no-image-text { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--pale); }
+
+/* ── MOBILE MENU TOGGLE ── */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 200;
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  font-size: 8px; font-weight: 400; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--mid);
+  font-family: 'Jost', sans-serif;
+  cursor: pointer;
+}
+
+/* ── MOBILE STYLES ── */
+@media (max-width: 768px) {
+  html, body { cursor: auto; }
+  .cursor, .cursor-ring { display: none; }
+
+  #app {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-toggle { display: block; }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 140;
+  }
+  .sidebar-overlay.show { display: block; }
+
+  .viewer { height: 100vh; }
+
+  .main-image-wrap img {
+    object-fit: contain;
+    background: var(--ink);
+  }
+
+  .image-strip {
+    bottom: 70px;
+    left: 12px;
+    gap: 4px;
+  }
+
+  .strip-thumb {
+    width: 44px;
+    height: 32px;
+  }
+
+  .info-panel {
+    padding: 14px 16px 18px;
+  }
+
+  .project-title {
+    font-size: 22px;
+  }
+
+  .top-bar {
+    padding: 14px 16px;
+    padding-left: 100px;
+  }
+
+  .arrow-btn {
+    width: 40px; height: 40px;
+    font-size: 18px;
+  }
+
+  .intro-name { font-size: clamp(36px, 12vw, 60px); }
+}
 </style>
 </head>
 <body>
@@ -242,7 +329,9 @@ html, body {
 
 <!-- MAIN APP -->
 <div id="app">
-  <aside class="sidebar">
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+  <button class="menu-toggle" onclick="toggleSidebar()">☰ Projects</button>
+  <aside class="sidebar" id="sidebar">
     <div>
       <p class="sidebar-logo-name">Tamara<br>Podolianko</p>
       <p class="sidebar-logo-title">Interior Designer · CG Artist</p>
@@ -353,7 +442,7 @@ const projects = [
 function getImages(project) {
   const imgs = [];
   for (let i = 1; i <= project.count; i++) {
-    imgs.push(`../${project.folder}/${i}.jpg`);
+    imgs.push(`/${project.folder}/${i}.jpg`);
   }
   return imgs;
 }
@@ -499,10 +588,26 @@ function goToProject(idx) {
 
   // Scroll nav item into view
   if (navItem) navItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  // Close mobile sidebar after selection
+  closeSidebar();
 }
 
 function nextProject() { goToProject((currentProject + 1) % projects.length); }
 function prevProject() { goToProject((currentProject - 1 + projects.length) % projects.length); }
+
+// Mobile sidebar
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
 
 // Keyboard
 document.addEventListener('keydown', e => {
